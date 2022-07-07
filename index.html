@@ -62,7 +62,7 @@
                 <div class="weui-panel__bd">
                     <div role="option" class="weui-media-box weui-media-box_text">
                         <strong class="weui-media-box__title">充值成功后，我的余额在哪里看？</strong>
-                        <p class="weui-media-box__desc">您可以发送"/balance"查看您的余额。，也可以在上一条说的菜单中点击"余额"。</p>
+                        <p class="weui-media-box__desc">您可以发送"/balance"查看您的余额，也可以在上一条说的菜单中点击"余额"。</p>
                         </p>
                     </div>
                 </div>
@@ -393,8 +393,6 @@
 ];
 
     //document.querySelector('#dapp-link').innerHTML = info.dappLink;
-    document.querySelector('#pay-money').innerHTML = info.payMoney.toFixed(6);
-    document.querySelector('#order-id').innerHTML = '订单号：' + info.orderId;
 
     function copyDappLink() {
         const input = document.createElement("input");
@@ -416,14 +414,16 @@
         }
 
         let u = new URL(window.location.href);
-        info.address = u.searchParams.get('address');
-        info.orderId = u.searchParams.get('orderid');
-        info.payMoney = parseFloat(u.searchParams.get('amount'));
-        info.expire = parseInt(u.searchParams.get('expire'));
-
-
+        info.address = u.searchParams.get('addr');
+        info.orderId = u.searchParams.get('o');
+        info.payMoney = parseInt(u.searchParams.get('amt'));
+        info.expire = parseInt(u.searchParams.get('e'));
+        let decimals = parseInt(u.searchParams.get('d'));
+        info.payMoney = info.payMoney / Math.pow(10,decimals);
 
         qrcode.makeCode(info.address);
+        document.querySelector('#pay-money').innerHTML = info.payMoney.toFixed(6);
+        document.querySelector('#order-id').innerHTML = '订单号：' + info.orderId;
     }
 
     var timerid = undefined;
