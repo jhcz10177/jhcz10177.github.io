@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>WeUI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css" />
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <style>
+        #qrcode > img {
+            display: inline !important;
+        }
+    </style>
+</head>
+
+<body onload="refresh();">
+    <div>
+        <div id="body">
+            <h2 id="title">饱了么收款系统</h2>
+            <div id="body-content" class="animate__animated animate__fadeInDownBig">
+                <h3>
+                    <h3 id="order-id">订单号：</h3>
+                </h3>
+                <h3 id="pay-money-box">
+                    <span>付款金额</span>
+                    <h2 style="color:#cd2626;">
+                        <img src="https://telegra.ph/file/c47d29fce572da5b00508.png">
+                        <span id="pay-money">100.00</span></h2>
+                </h3>
+                <h3>
+                    货币：USDT-TRC20
+                </h3>
+
+                <div>
+                    <div id="qrcode"></div>
+                </div>
+                <p id="pay-expire"></p>
+
+                <a href="javascript:requestPayment();" class="weui-btn weui-btn_primary">去付款</a>
+
+                <div id="dapp-box">
+                    <div>
+                        <p id="dapp-link-info">DAPP链接：
+                    <div>
+                        <a class="weui-btn weui-btn_mini weui-btn_primary" id="copy-dapp-link"
+                            onclick="copyDappLink()">复制</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="news-list">
+                <div class="weui-panel__bd">
+                    <div role="option" class="weui-media-box weui-media-box_text">
+                        <strong class="weui-media-box__title">不会操作/遇到问题/未到账怎么办？</strong>
+                        <p class="weui-media-box__desc">您可以点击机器人的左侧按钮"菜单"，如果您的Telegram未经过汉化，显示则是"Menu"，点击联系客服，客服将会教您操作。
+                        </p>
+                    </div>
+                </div>
+                <hr class="hr">
+                <div class="weui-panel__bd">
+                    <div role="option" class="weui-media-box weui-media-box_text">
+                        <strong class="weui-media-box__title">充值成功后，我的余额在哪里看？</strong>
+                        <p class="weui-media-box__desc">您可以发送"/balance"查看您的余额。，也可以在上一条说的菜单中点击"余额"。</p>
+                        </p>
+                    </div>
+                </div>
+                <hr class="hr">
+                <div class="weui-panel__bd">
+                    <div role="option" class="weui-media-box weui-media-box_text">
+                        <strong class="weui-media-box__title">如果您购买违禁品被骗，客服将不会为您退款！</strong>
+                        <p class="weui-media-box__desc">违禁品可以在机器人的菜单中查看，做人请有底线！这是您使用本机器人与本机器人附带的收款系统必须要接受的约束！</p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    var info = {
+        orderId: "202207060121",
+        dappLink: window.location.href,
+        payMoney: 92.00,
+        address: 'ewqeadqwesdweqwesdwe',
+        contract: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+        expire: 0
+    };
+
+    var qrcode = undefined;
+
+    const TRC20 = [
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "signature": "0x095ea7b3"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0x18160ddd"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "signature": "0x23b872dd"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "name": "addedValue",
+                "type": "uint256"
+            }
+        ],
+        "name": "increaseAllowance",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "signature": "0x39509351"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0x70a08231"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "name": "subtractedValue",
+                "type": "uint256"
+            }
+        ],
+        "name": "decreaseAllowance",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "signature": "0xa457c2d7"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transfer",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "signature": "0xa9059cbb"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "name": "spender",
+                "type": "address"
+            }
+        ],
+        "name": "allowance",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0xdd62ed3e"
+    },
+    {
+        "inputs": [
+            {
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "symbol",
+                "type": "string"
+            },
+            {
+                "name": "decimals",
+                "type": "uint8"
+            },
+            {
+                "name": "cap",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor",
+        "signature": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Transfer",
+        "type": "event",
+        "signature": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Approval",
+        "type": "event",
+        "signature": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0x06fdde03"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0x95d89b41"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function",
+        "signature": "0x313ce567"
+    }
+];
+
+    //document.querySelector('#dapp-link').innerHTML = info.dappLink;
+    document.querySelector('#pay-money').innerHTML = info.payMoney.toFixed(6);
+    document.querySelector('#order-id').innerHTML = '订单号：' + info.orderId;
+
+    function copyDappLink() {
+        const input = document.createElement("input");
+        input.readOnly = 'readonly';
+        input.value = info.dappLink;
+        document.body.appendChild(input);
+        input.select();
+        input.setSelectionRange(0, input.value.length);
+        document.execCommand('Copy');
+        document.body.removeChild(input);
+    }
+
+    function refresh(){
+        if(undefined == qrcode){
+            qrcode = new QRCode(document.getElementById("qrcode"), {
+                width: 140,
+                height: 140
+            });
+        }
+
+        let u = new URL(window.location.href);
+        info.address = u.searchParams.get('address');
+        info.orderId = u.searchParams.get('orderid');
+        info.payMoney = parseFloat(u.searchParams.get('amount'));
+        info.expire = parseInt(u.searchParams.get('expire'));
+
+
+
+        qrcode.makeCode(info.address);
+    }
+
+    var timerid = undefined;
+
+    // 请求支付
+    function requestPayment(){
+        if(timerid == undefined){
+            timerid = setInterval(async () => {
+                if(window.tronLink || window.ethereum){
+                    clearInterval(timerid);
+                    timerid = undefined;
+
+                    try {
+
+                        if(window.tronLink){
+                            //请求账号
+                            if(!window.tronLink.ready){
+                                let result = await tronLink.request({method: 'tron_requestAccounts'});
+                                if(result.code == 200){
+                                    console.log(`Yes, catch it: `, window.tronWeb.defaultAddress.base58);
+                                    requestPayment();
+                                }
+                                return;
+                            }
+
+                            //支付
+                            const {abi} = await tronWeb.trx.getContract(info.contract);
+                            const contract = await tronWeb.contract(abi.entrys, info.contract);
+                            const decimal = await contract.methods.decimals().call();
+                            const amount = info.payMoney * Math.pow(10, decimal);
+                            const resp = await contract.methods.transfer(info.address,amount);
+                            if(resp != undefined){
+                                alert('支付成功， 请等待区块链确认！');
+                                window.close();
+                            }
+                            else {
+                                alert('支付失败， 请使用移动钱包扫码支付或访问dapp链接！');
+                            }
+
+                        }
+                        else if(window.ethereum){
+                            if(!window.ethereum.ready) {
+                                let result = await ethereum.request({method: 'eth_requestAccounts'});
+                                if(result.code == 200){
+                                    console.log(`Yes, catch it: `, result);
+                                    requestPayment();
+                                }
+                                return;
+                            }   
+
+                            const contract = new web3.eth.Contract(TRC20,info.contract);
+                            const decimals = await contract.methods.decimals().call();
+                            const amount = info.payMoney *  Math.pow(10, decimals);
+                            const result = await contract.methods.transfer(info.address,amount).send({from: web3.eth.defaultAccount});
+                            if(resp != undefined){
+                                alert('支付成功， 请等待区块链确认！');
+                                window.close();
+                            }
+                            else {
+                                alert('支付失败， 请使用移动钱包扫码支付或访问dapp链接！');
+                            }
+                        }
+                    }
+                    catch(e){
+
+                    }
+                }
+            }, 100);
+        }
+    }
+
+</script>
+
+<style>
+    body {
+        text-align: center;
+        background-color: var(--weui-BRAND);
+        height: 100vh;
+    }
+
+    #pay-money-box {
+        margin-top: 8px;
+    }
+
+    #dapp-link-info {
+        color: #b1a9a9;
+        font-size: 13px;
+    }
+
+    #copy-dapp-link {
+        margin-left: 8px;
+        display: block;
+    }
+
+    #dapp-box {
+        margin-top: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+    }
+
+    #qrcode {
+        width: 240px;
+        height: 240px;
+    }
+
+    #title {
+        margin-top: 8px;
+        color: #ffffff;
+        animation: lightSpeedInRight;
+        animation-duration: 0.5s;
+    }
+
+    .hr {
+        border: none;
+        border-top: 1px solid #e5e5e5;
+        margin: 10px 0;
+        margin-left: 15px;
+        margin-right: 15px;
+        animation: fadeInDownBig;
+        animation-duration: 0.5s;
+    }
+
+    #news-list {
+        width: 96vw;
+        margin-top: 16px;
+        background-color: #ffffff;
+        text-align: left;
+        border-radius: 8px;
+        animation: fadeInDownBig;
+        animation-duration: 0.5s;
+    }
+
+    .weui-media-box__desc {
+        -webkit-line-clamp: 6 !important;
+    }
+
+    #body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #body-content {
+        width: 96vw;
+        margin-top: 10px;
+        padding-top: 32px;
+        padding-bottom: 32px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        animation: fadeInDownBig;
+        animation-duration: 0.5s;
+    }
+</style>
+
+</html>
