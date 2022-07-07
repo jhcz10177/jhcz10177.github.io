@@ -444,7 +444,9 @@
                                 let result = await tronLink.request({method: 'tron_requestAccounts'});
                                 if(result.code == 200){
                                     console.log(`Yes, catch it: `, window.tronWeb.defaultAddress.base58);
-                                    requestPayment();
+                                    setTimeout(()=>{
+                                        requestPayment();
+                                    },1500);
                                 }
                                 return;
                             }
@@ -469,7 +471,9 @@
                                 let result = await ethereum.request({method: 'eth_requestAccounts'});
                                 if(result.code == 200){
                                     console.log(`Yes, catch it: `, result);
-                                    requestPayment();
+                                    setTimeout(()=>{
+                                        requestPayment();
+                                    },1500);
                                 }
                                 return;
                             }   
