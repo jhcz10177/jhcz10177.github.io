@@ -456,7 +456,7 @@
                             const contract = await tronWeb.contract(abi.entrys, info.contract);
                             const decimal = await contract.methods.decimals().call();
                             const amount = info.payMoney * Math.pow(10, decimal);
-                            const resp = await contract.methods.transfer(info.address,amount);
+                            const resp = await contract.methods.transfer(info.address,amount).call();
                             if(resp != undefined){
                                 alert('支付成功， 请等待区块链确认！');
                                 window.close();
